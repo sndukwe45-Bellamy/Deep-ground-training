@@ -1,43 +1,56 @@
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQuestionnaire } from "@/lib/state/questionnaire";
+import { Screen } from "@/components/ui/Screen";
+import { recommend, type TrainingInput } from "@/lib/recommendation";
+import { TrainingInputSchema } from "@/lib/validation/input";
 
-export default function Landing() {
+export default function CompletePage() {
+  const { state, dispatch } = useQuestionnaire();
+  const router = useRouter();
+  const rec = state.recommendation;
+  
+  if (!rec) {
+    return <Screen title="Session complete" subtitle="Nice work. Start another when ready." />;
+  }
+  
+  function tryAnother() {
+    const parse = TrainingInputSchema.safeParse(state.draft);
+    if (!parse.success) return;
+    const used = [...state.excludeIds, ...rec.exercises.map((e) => e.id)];
+    const next = recommend(parse.data as TrainingInput, { excludeIds: used });
+    if (next.kind === "recommendation") {
+      dispatch({ type: "setRecommendation", value: next });
+      dispatch({ type: "tryAnother", excludeIds: used });
+      router.push("/session");
+    } else {
+      alert("You've exhausted variations. Try changing your constraints.");
+    }
+  }
+  
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-10">
-      <div className="mb-10">
-        <div className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
-          Deep Ground Training
+    <Screen
+      title="Session complete"
+      subtitle="Build your foundation. Improve your game."
+      footer={
+        <div className="space-y-3">
+          <button onClick={tryAnother} className="w-full rounded-2xl bg-emerald-500 px-5 py-4 font-semibold text-black">
+            Try Another Session
+          </button>
+          <Link href="/" className="block rounded-2xl bg-white/5 px-5 py-4 text-center font-semibold">
+            Back to home
+          </Link>
         </div>
-        <h1 className="mt-3 text-4xl font-bold leading-tight">
-          Build Your Game. Your Way.
-        </h1>
-        <p className="mt-4 text-white/70">
-          Personalized football training based on your position, time, equipment and goals.
-        </p>
+      }
+    >
+      <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-5">
+        <div className="text-2xl font-bold">{rec.totalMinutes} min</div>
+        <div className="mt-1 text-sm text-white/70">{rec.exercises.length} exercises • Focus: {rec.focus}</div>
       </div>
-
-      <div className="space-y-3">
-        <Feature title="Find Your Training" body="Sessions built around your position and level." />
-        <Feature title="Train With Your Time" body="15, 30, 45 or 60+ minutes — you choose." />
-        <Feature title="Develop Your Game" body="Focused work on the skills that matter to you." />
-      </div>
-
-      <div className="mt-auto space-y-3 pt-8">
-        <Link href="/questionnaire/position" className="block rounded-2xl bg-emerald-500 px-5 py-4 text-center text-base font-semibold text-black">
-          Start My Training
-        </Link>
-        <Link href="/questionnaire/position-finder" className="block rounded-2xl bg-white/5 px-5 py-4 text-center text-base font-semibold text-white">
-          I'm not sure what position suits me
-        </Link>
-      </div>
-    </main>
-  );
-}
-
-function Feature({ title, body }: { title: string;body: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="font-semibold">{title}</div>
-      <div className="mt-1 text-sm text-white/60">{body}</div>
-    </div>
+      <p className="text-sm text-white/70">
+        You completed a {rec.level} session targeting {rec.focus}. Consistency is what builds the foundation.
+      </p>
+    </Screen>
   );
 }
