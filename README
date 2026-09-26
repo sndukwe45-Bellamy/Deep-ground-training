@@ -1,0 +1,24 @@
+# Deep Ground Training
+
+Mobile-first football training recommender. Deterministic engine, no LLM.
+
+## Run
+npm install
+npm run dev
+
+## Test
+npm run test
+npm run typecheck
+npm run build
+
+## Architecture
+- `lib/recommendation` — framework-independent engine
+- `lib/state` — questionnaire state
+- `app/` — Next.js routes
+- `data/exercises.json` — 50-exercise dataset
+
+## Env
+None required for MVP.
+
+## Deploy
+Vercel: connect repo, build command `next build`.
