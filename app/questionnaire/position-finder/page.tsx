@@ -35,32 +35,55 @@ export default function PositionFinder() {
   function suggest() {
     let position: Position = "midfielder";
     let why = "You enjoy being involved across the pitch and reading the game.";
-    if (enjoy === "saving") { position = "goalkeeper"; why = "You enjoy saving shots and protecting the goal."; }
-    else if (enjoy === "scoring" || strength === "finishing") { position = "attacker"; why = "You enjoy scoring and finishing chances."; }
-    else if (enjoy === "defending" || strength === "strength") { position = "defender"; why = "You enjoy defending and using your strength."; }
-    else if (strength === "speed") { position = "attacker"; why = "Your speed suits attacking transitions."; }
-    else if (strength === "passing" || enjoy === "passing" || enjoy === "creating") { position = "midfielder"; why = "You enjoy creating and linking play."; }
+    if (enjoy === "saving") {
+      position = "goalkeeper";
+      why = "You enjoy saving shots and protecting the goal.";
+    } else if (enjoy === "scoring" || strength === "finishing") {
+      position = "attacker";
+      why = "You enjoy scoring and finishing chances.";
+    } else if (enjoy === "defending" || strength === "strength") {
+      position = "defender";
+      why = "You enjoy defending and using your strength.";
+    } else if (strength === "speed") {
+      position = "attacker";
+      why = "Your speed suits attacking transitions.";
+    } else if (strength === "passing" || enjoy === "passing" || enjoy === "creating") {
+      position = "midfielder";
+      why = "You enjoy creating and linking play.";
+    }
     setResult({ position, why });
   }
 
   if (result) {
+    const suggestedPosition = result.position;
+    const explanation = result.why;
+
+    function continueWithSuggestion() {
+      dispatch({ type: "set", patch: { position: suggestedPosition } });
+      router.push("/questionnaire/time");
+    }
+
     return (
       <Screen
         title="Suggested position"
-        subtitle={result.why}
+        subtitle={explanation}
         footer={
           <div className="space-y-3">
-            <Button onClick={() => { dispatch({ type: "set", patch: { position: result.position } }); router.push("/questionnaire/time"); }}>
-              Continue as {result.position}
+            <Button onClick={continueWithSuggestion}>
+              Continue as {suggestedPosition}
             </Button>
-            <Button variant="ghost" onClick={() => setResult(null)}>Change answers</Button>
+            <Button variant="ghost" onClick={() => setResult(null)}>
+              Change answers
+            </Button>
           </div>
         }
       >
         <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-5 text-lg font-semibold capitalize">
-          {result.position}
+          {suggestedPosition}
         </div>
-        <p className="text-sm text-white/60">This is a suggestion, not a definitive assessment. You can change it later.</p>
+        <p className="text-sm text-white/60">
+          This is a suggestion, not a definitive assessment. You can change it later.
+        </p>
       </Screen>
     );
   }
@@ -69,18 +92,32 @@ export default function PositionFinder() {
     <Screen
       title="Let's find your position"
       subtitle="Answer two quick questions."
-      footer={<Button disabled={!enjoy || !strength} onClick={suggest}>Suggest my position</Button>}
+      footer={
+        <Button disabled={!enjoy || !strength} onClick={suggest}>
+          Suggest my position
+        </Button>
+      }
     >
       <div className="space-y-2">
         <div className="text-sm font-semibold text-white/70">What do you enjoy most?</div>
         {ENJOYMENT.map((e) => (
-          <ChoiceCard key={e.key} label={e.label} selected={enjoy === e.key} onClick={() => setEnjoy(e.key)} />
+          <ChoiceCard
+            key={e.key}
+            label={e.label}
+            selected={enjoy === e.key}
+            onClick={() => setEnjoy(e.key)}
+          />
         ))}
       </div>
       <div className="space-y-2 pt-4">
-        <div className="text-sm font-semibold text-white/70">What's your biggest strength?</div>
+        <div className="text-sm font-semibold text-white/70">What&apos;s your biggest strength?</div>
         {STRENGTHS.map((s) => (
-          <ChoiceCard key={s.key} label={s.label} selected={strength === s.key} onClick={() => setStrength(s.key)} />
+          <ChoiceCard
+            key={s.key}
+            label={s.label}
+            selected={strength === s.key}
+            onClick={() => setStrength(s.key)}
+          />
         ))}
       </div>
     </Screen>
