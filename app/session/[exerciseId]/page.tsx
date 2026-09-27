@@ -5,49 +5,78 @@ import { Screen } from "@/components/ui/Screen";
 import { useState } from "react";
 
 export default function ExerciseDetail() {
-  const { exerciseId } = useParams < { exerciseId: string } > ();
-  const { state, dispatch } = useQuestionnaire();
+  const { exerciseId } = useParams<{ exerciseId: string }>();
+  const { state } = useQuestionnaire();
   const router = useRouter();
   const rec = state.recommendation;
-  const [completed, setCompleted] = useState < Set < string >> (new Set());
-  
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
+
   if (!rec) {
-    return <Screen title="No session" subtitle="Start a session first." />;
-  }
-  
-  const idx = rec.exercises.findIndex((e) => e.id === exerciseId);
-  const ex = rec.exercises[idx];
-  if (!ex) {
     return (
-      <Screen title="Exercise not found" footer={<button onClick={() => router.push("/session")} className="w-full rounded-2xl bg-white/5 px-5 py-4">Back to session</button>}>
-        <p className="text-sm text-white/60">This exercise isn't part of your current session.</p>
+      <Screen title="No session" subtitle="Start a session first.">
+        <button
+          onClick={() => router.push("/questionnaire/position")}
+          className="w-full rounded-2xl bg-emerald-500 px-5 py-4 font-semibold text-black"
+        >
+          Start setup
+        </button>
       </Screen>
     );
   }
-  
+
+  const idx = rec.exercises.findIndex((e) => e.id === exerciseId);
+  const ex = rec.exercises[idx];
+
+  if (!ex) {
+    return (
+      <Screen
+        title="Exercise not found"
+        footer={
+          <button
+            onClick={() => router.push("/session")}
+            className="w-full rounded-2xl bg-white/5 px-5 py-4 font-semibold"
+          >
+            Back to session
+          </button>
+        }
+      >
+        <p className="text-sm text-white/60">
+          This exercise is not part of your current session.
+        </p>
+      </Screen>
+    );
+  }
+
   const isLast = idx === rec.exercises.length - 1;
-  
+  const nextId = !isLast ? rec.exercises[idx + 1].id : null;
+
   function markComplete() {
     const next = new Set(completed);
-    next.add(ex.id);
+    next.add(ex!.id);
     setCompleted(next);
-    if (isLast) {
-      router.push("/session/complete");
+    if (nextId) {
+      router.push(`/session/${nextId}`);
     } else {
-      router.push(`/session/${rec.exercises[idx + 1].id}`);
+      router.push("/session/complete");
     }
   }
-  
+
   return (
     <Screen
       title={ex.name}
       subtitle={`${ex.category} • ${ex.duration} min`}
       footer={
         <div className="space-y-3">
-          <button onClick={markComplete} className="w-full rounded-2xl bg-emerald-500 px-5 py-4 font-semibold text-black">
+          <button
+            onClick={markComplete}
+            className="w-full rounded-2xl bg-emerald-500 px-5 py-4 font-semibold text-black"
+          >
             {isLast ? "Finish Session" : "Mark Complete & Next"}
           </button>
-          <button onClick={() => router.push("/session")} className="w-full rounded-2xl bg-white/5 px-5 py-4 font-semibold">
+          <button
+            onClick={() => router.push("/session")}
+            className="w-full rounded-2xl bg-white/5 px-5 py-4 font-semibold"
+          >
             Back to session
           </button>
         </div>
