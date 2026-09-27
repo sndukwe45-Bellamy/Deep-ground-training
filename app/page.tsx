@@ -32,7 +32,7 @@ export default function Landing() {
           href="/questionnaire/position-finder"
           className="block rounded-2xl bg-white/5 px-5 py-4 text-center text-base font-semibold text-white"
         >
-          I'm not sure what position suits me
+          I am not sure what position suits me
         </Link>
       </div>
     </main>
