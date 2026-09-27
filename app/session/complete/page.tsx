@@ -24,17 +24,22 @@ export default function CompletePage() {
     );
   }
 
+  const usedIds = [...state.excludeIds, ...rec.exercises.map((e) => e.id)];
+  const totalMinutes = rec.totalMinutes;
+  const exerciseCount = rec.exercises.length;
+  const level = rec.level;
+  const focus = rec.focus;
+
   function tryAnother() {
     const parse = TrainingInputSchema.safeParse(state.draft);
     if (!parse.success) return;
-    const used = [...state.excludeIds, ...rec.exercises.map((e) => e.id)];
-    const next = recommend(parse.data as TrainingInput, { excludeIds: used });
+    const next = recommend(parse.data as TrainingInput, { excludeIds: usedIds });
     if (next.kind === "recommendation") {
       dispatch({ type: "setRecommendation", value: next });
-      dispatch({ type: "tryAnother", excludeIds: used });
+      dispatch({ type: "tryAnother", excludeIds: usedIds });
       router.push("/session");
     } else {
-      alert("You've exhausted variations. Try changing your constraints.");
+      alert("You have exhausted variations. Try changing your constraints.");
     }
   }
 
@@ -60,13 +65,13 @@ export default function CompletePage() {
       }
     >
       <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-5">
-        <div className="text-2xl font-bold">{rec.totalMinutes} min</div>
+        <div className="text-2xl font-bold">{totalMinutes} min</div>
         <div className="mt-1 text-sm text-white/70">
-          {rec.exercises.length} exercises • Focus: {rec.focus}
+          {exerciseCount} exercises • Focus: {focus}
         </div>
       </div>
       <p className="text-sm text-white/70">
-        You completed a {rec.level} session targeting {rec.focus}. Consistency is what builds the foundation.
+        You completed a {level} session targeting {focus}. Consistency is what builds the foundation.
       </p>
     </Screen>
   );
