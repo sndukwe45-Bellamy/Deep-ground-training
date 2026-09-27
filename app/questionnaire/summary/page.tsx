@@ -10,22 +10,28 @@ export default function SummaryPage() {
   const { state, dispatch } = useQuestionnaire();
   const router = useRouter();
   const d = state.draft;
-  
+
   const parse = TrainingInputSchema.safeParse(d);
   if (!parse.success) {
     return (
       <Screen title="Something's missing" subtitle="Please go back and complete every step.">
-        <p className="text-sm text-red-400">{parse.error.issues.map((i) => i.path.join(".")).join(", ")}</p>
-        <button className="mt-4 w-full rounded-2xl bg-white/5 px-5 py-4" onClick={() => router.push("/questionnaire/position")}>
+        <p className="text-sm text-red-400">
+          {parse.error.issues.map((i) => i.path.join(".")).join(", ")}
+        </p>
+        <button
+          className="mt-4 w-full rounded-2xl bg-white/5 px-5 py-4"
+          onClick={() => router.push("/questionnaire/position")}
+        >
           Start over
         </button>
       </Screen>
     );
   }
-  
+
+  const validatedInput = parse.data as TrainingInput;
+
   function build() {
-    const input = parse.data as TrainingInput;
-    const result = recommend(input, { excludeIds: state.excludeIds });
+    const result = recommend(validatedInput, { excludeIds: state.excludeIds });
     if (result.kind === "recommendation") {
       dispatch({ type: "setRecommendation", value: result });
       router.push("/session");
@@ -33,21 +39,27 @@ export default function SummaryPage() {
       alert(result.reason);
     }
   }
-  
+
   return (
     <Screen
       title="Your session summary"
       subtitle="Step 7 of 7"
       footer={
         <div className="space-y-3">
-          <button onClick={build} className="w-full rounded-2xl bg-emerald-500 px-5 py-4 text-base font-semibold text-black">
+          <button
+            onClick={build}
+            className="w-full rounded-2xl bg-emerald-500 px-5 py-4 text-base font-semibold text-black"
+          >
             Build My Training Plan
           </button>
-          <button onClick={() => router.back()} className="w-full rounded-2xl bg-white/5 px-5 py-4 text-base font-semibold">
+          <button
+            onClick={() => router.back()}
+            className="w-full rounded-2xl bg-white/5 px-5 py-4 text-base font-semibold"
+          >
             Back
           </button>
           <p className="text-center text-xs text-white/50">
-            Want to improve your football career? Let's build your session.
+            Want to improve your football career? Let&apos;s build your session.
           </p>
         </div>
       }
@@ -65,7 +77,7 @@ export default function SummaryPage() {
   );
 }
 
-function Row({ label, value }: { label: string;value: string }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
       <span className="text-sm text-white/60">{label}</span>
